@@ -1,12 +1,12 @@
 import { IsEnum } from 'class-validator';
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { Role } from '../type/userRole.type';
 
 @Entity({
     name: "user"
 })
 export class User {
-    @PrimaryGeneratedColumn()
+    @PrimaryGeneratedColumn({ unsigned: true })
     id: number;
 
     @Column({ type: 'varchar', unique: true, nullable: false })
@@ -18,7 +18,7 @@ export class User {
     @Column({ type: 'varchar', unique: true, nullable: false })
     nickname: string;
 
-    @Column({ type: 'int', default: 0, nullable: false })
+    @Column({ type: 'int', default: 0, nullable: false, unsigned: true })
     point: number;
 
     @IsEnum(Role)
@@ -27,4 +27,7 @@ export class User {
 
     @CreateDateColumn({ type: 'timestamp' })
     createdAt: Date;
+
+    @UpdateDateColumn({ type: "timestamp" })
+    updatedAt: Date;
 }

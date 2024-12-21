@@ -5,12 +5,16 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { loginUserDto } from './dto/login-user.dto';
+import { LoginUserDto } from './dto/login-user.dto';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UserService {
 
   constructor(
+    // private readonly configService: ConfigService,
+    private readonly jwtService: JwtService,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
   ) { }
@@ -19,8 +23,8 @@ export class UserService {
   async signup(createUserDto: CreateUserDto) {
     const { email, password, passwordConfirm, nickname } = createUserDto;
 
-    const existedUser = await this.userRepository.findOne({
-      where: { email: email },
+    const existedUser = await this.userRepository.findOneBy({
+      email: email
     });
 
     if (existedUser) {
@@ -31,7 +35,15 @@ export class UserService {
       throw new BadRequestException("비밀번호와 비밀번호 확인이 일치하지 않습니다")
     }
 
-    const hashedPassword = await hash(password, 12);
+    const existedNickname = await this.userRepository.findOneBy({
+      nickname: nickname
+    })
+
+    if (existedNickname) {
+      throw new ConflictException("이미 존재하는 닉네임입니다.");
+    }
+
+    const hashedPassword = await hash(password, 10);
 
     const newUser = await this.userRepository.save({ email, password: hashedPassword, nickname: nickname });
 
@@ -44,12 +56,16 @@ export class UserService {
   }
 
   // 로그인
-  async login(loginUserDto: loginUserDto) {
+  async login(loginUserDto: LoginUserDto) {
     const { email, password } = loginUserDto;
 
     const user = await this.userRepository.findOne({
-      select: ['id', 'email', 'password'],
       where: { email },
+      select: {
+        id: true,
+        email: true,
+        password: true
+      },
     })
 
     if (!user) {
@@ -60,9 +76,12 @@ export class UserService {
       throw new UnauthorizedException('비밀번호를 확인해주세요.')
     }
 
-    const payload = { email, sub: user.id };
+    // jwt에 담을 user의 정보
+    const payload = { email: user.email, sub: user.id };
 
-    return
+    return {
+      access_token: this.jwtService.sign(payload, { expiresIn: '6h' }),
+    };
   }
 
   async findByEmail(email: string) {
