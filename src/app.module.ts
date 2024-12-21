@@ -6,7 +6,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserModule } from './user/user.module';
 import { User } from './user/entities/user.entity';
-import { AuthService } from './auth/auth.service';
 import { AuthModule } from './auth/auth.module';
 
 @Module({
@@ -25,6 +24,7 @@ import { AuthModule } from './auth/auth.module';
         database: configService.get('DATABASE_NAME'),
         entities: [User],
         synchronize: true,
+        logging: true,
       }),
       inject: [ConfigService],
     }),
@@ -33,6 +33,6 @@ import { AuthModule } from './auth/auth.module';
     AuthModule
   ],
   controllers: [AppController],
-  providers: [AppService, AuthService],
+  providers: [AppService],
 })
 export class AppModule { }

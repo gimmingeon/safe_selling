@@ -1,16 +1,28 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Res } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './entities/user.entity';
+import { LoginUserDto } from './dto/login-user.dto';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) { }
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.signup(createUserDto);
+  // 회원가입
+  @Post('/signup')
+  async signup(@Body() createUserDto: CreateUserDto) {
+    return await this.userService.signup(createUserDto);
+  }
+
+  // 로그인
+  @Post('/login')
+  async login(
+    @Body() loginUserDto: LoginUserDto,
+    @Res() res: Response
+  ) {
+    const { access_token } = await this.userService.login(loginUserDto);
+
+    //res.setHeader('Authorization', `Bearer ${access_token}`);
   }
 
   @Get()
