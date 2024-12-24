@@ -8,6 +8,7 @@ import { UserModule } from './user/user.module';
 import { User } from './user/entities/user.entity';
 import { AuthModule } from './auth/auth.module';
 import { MailModule } from './mail/mail.module';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
@@ -32,7 +33,8 @@ import { MailModule } from './mail/mail.module';
     PostModule,
     UserModule,
     AuthModule,
-    MailModule
+    MailModule,
+    RedisModule,
   ],
   controllers: [AppController],
   providers: [AppService],

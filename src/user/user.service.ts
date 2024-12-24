@@ -9,6 +9,7 @@ import { LoginUserDto } from './dto/login-user.dto';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { MailService } from 'src/mail/mail.service';
+import { RedisService } from 'src/redis/redis.service';
 
 @Injectable()
 export class UserService {
@@ -18,7 +19,8 @@ export class UserService {
     private readonly jwtService: JwtService,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    private readonly mailService: MailService
+    private readonly mailService: MailService,
+    private readonly redisService: RedisService
   ) { }
 
   // 회원가입
@@ -67,6 +69,16 @@ export class UserService {
     }
 
     const verifyNumber = RandomNumber(111111, 999999);
+
+    const redisClient = this.redisService.getClient();
+
+    const redistest = await redisClient.get(`verification_code:${email}`);
+
+    console.log(redistest);
+
+    await redisClient.set(`verification_code:${email}`, verifyNumber, 'EX', 300);
+
+    // await redisClient.flushall();
 
     await this.mailService.sendEmail(email, verifyNumber);
 
