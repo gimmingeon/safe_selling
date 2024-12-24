@@ -77,24 +77,21 @@ export class UserService {
     }
 
     // jwt에 담을 user의 정보
+    // email : 사용자의 데이터
     const payload = { email: user.email, sub: user.id };
 
     return {
-      access_token: this.jwtService.sign(payload, { expiresIn: '6h' }),
+      access_token: this.jwtService.sign(payload, { expiresIn: '1h' }),
     };
   }
 
   async findByEmail(email: string) {
-    return this.userRepository.findOneBy({ email });
+    return await this.userRepository.findOneBy({ email });
 
   }
 
-  findAll() {
-    return `This action returns all user`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(userId: number) {
+    return await this.userRepository.findOneBy({ id: userId });
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
