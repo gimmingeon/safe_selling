@@ -8,6 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { LoginUserDto } from './dto/login-user.dto';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class UserService {
@@ -17,6 +18,7 @@ export class UserService {
     private readonly jwtService: JwtService,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly mailService: MailService
   ) { }
 
   // 회원가입
@@ -52,6 +54,21 @@ export class UserService {
     // return result
 
     return newUser;
+
+  }
+
+  // 이메일 인증
+  async verifyemail(email: string) {
+    const RandomNumber = (min: number, max: number) => {
+      min = Math.ceil(min);
+      max = Math.floor(max);
+
+      return Math.floor(Math.random() * (max - min)) + min;
+    }
+
+    const verifyNumber = RandomNumber(111111, 999999);
+
+    await this.mailService.sendEmail(email, verifyNumber);
 
   }
 

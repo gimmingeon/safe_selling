@@ -16,6 +16,11 @@ export class UserController {
     return await this.userService.signup(createUserDto);
   }
 
+  @Post('/verifyemail')
+  async verifyemail(@Body() body) {
+    return await this.userService.verifyemail(body.email);
+  }
+
   // 로그인
   @Post('/login')
   async login(
