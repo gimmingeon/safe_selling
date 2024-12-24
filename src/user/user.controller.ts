@@ -1,8 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Res } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Res, UseGuards, Request } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
+import { Response, } from 'express';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('user')
 export class UserController {
@@ -18,22 +20,26 @@ export class UserController {
   @Post('/login')
   async login(
     @Body() loginUserDto: LoginUserDto,
-    @Res() res: Response
+    @Res({ passthrough: true }) res: Response
   ) {
-    const { access_token } = await this.userService.login(loginUserDto);
+    const token = await this.userService.login(loginUserDto);
 
-    //res.setHeader('Authorization', `Bearer ${access_token}`);
+    res.cookie('Authorization', `Bearer ${token.access_token}`);
+
+    return token;
   }
 
-  @Get()
-  findAll() {
-    return this.userService.findAll();
+  @UseGuards(AuthGuard('jwt'))
+  @Get('/me')
+  async findMe(@Request() req) {
+
+    console.log(req.user);
+
+    const userId = req.user.id;
+
+    return await this.userService.findOne(userId);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
-  }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
