@@ -6,6 +6,10 @@ export class CreateUserDto {
   @IsNotEmpty({ message: "이메일을 입력해주세요." })
   email: string;
 
+  @IsString()
+  @IsNotEmpty({ message: "비밀번호를 입력해주세요." })
+  verifyNumber: string;
+
   /* 
   @MinLength(8)
   @Matches(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/, {
