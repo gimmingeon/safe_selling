@@ -1,5 +1,5 @@
 import { compare, hash } from 'bcrypt';
-import { BadRequestException, ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Repository } from 'typeorm';
@@ -25,18 +25,10 @@ export class UserService {
 
   // 회원가입
   async signup(createUserDto: CreateUserDto) {
-    const { email, password, passwordConfirm, nickname } = createUserDto;
-
-    const existedUser = await this.userRepository.findOneBy({
-      email: email
-    });
-
-    if (existedUser) {
-      throw new ConflictException("이미 가입된 이메일입니다.");
-    }
+    const { email, password, passwordConfirm, nickname, verifyNumber } = createUserDto;
 
     if (password !== passwordConfirm) {
-      throw new BadRequestException("비밀번호와 비밀번호 확인이 일치하지 않습니다")
+      throw new BadRequestException("비밀번호와 비밀번호 확인이 일치하지 않습니다");
     }
 
     const existedNickname = await this.userRepository.findOneBy({
@@ -47,9 +39,19 @@ export class UserService {
       throw new ConflictException("이미 존재하는 닉네임입니다.");
     }
 
+    const redisClient = this.redisService.getClient();
+
+    const checkVerifyNumber = await redisClient.get(`verification_code:${email}`);
+
+    if (checkVerifyNumber !== verifyNumber) {
+      throw new BadRequestException("인증번호가 일치하지 않습니다");
+    }
+
     const hashedPassword = await hash(password, 10);
 
     const newUser = await this.userRepository.save({ email, password: hashedPassword, nickname: nickname });
+
+    await redisClient.del(`verification_code:${email}`);
 
     // 반환값에서 password 제외
     //const { password: _, ...result } = newUser;
@@ -57,10 +59,20 @@ export class UserService {
 
     return newUser;
 
+
   }
 
   // 이메일 인증
   async verifyemail(email: string) {
+
+    const existedUser = await this.userRepository.findOneBy({
+      email: email
+    });
+
+    if (existedUser) {
+      throw new ConflictException("이미 가입된 이메일입니다.");
+    }
+
     const RandomNumber = (min: number, max: number) => {
       min = Math.ceil(min);
       max = Math.floor(max);
@@ -72,15 +84,13 @@ export class UserService {
 
     const redisClient = this.redisService.getClient();
 
-    const redistest = await redisClient.get(`verification_code:${email}`);
-
-    console.log(redistest);
-
     await redisClient.set(`verification_code:${email}`, verifyNumber, 'EX', 300);
 
-    // await redisClient.flushall();
-
-    await this.mailService.sendEmail(email, verifyNumber);
+    try {
+      await this.mailService.sendEmail(email, verifyNumber);
+    } catch (error) {
+      throw new InternalServerErrorException("이메일 전송 중 오류 발생.");
+    }
 
   }
 
