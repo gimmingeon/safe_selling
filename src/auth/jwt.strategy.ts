@@ -34,13 +34,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
 
     async validate(payload: any) {
-        console.log('JWT Payload:', payload);
+        //console.log('JWT Payload:', payload);
         const user = await this.userService.findByEmail(payload.email);
         if (!user) {
             throw new NotFoundException('사용자를 찾을 수 없습니다.');
         }
 
         // req.user에 저장이 된다
-        return { id: user.id, email: user.email };
+        return { id: user.id, email: user.email, nickname: user.nickname };
     }
 }

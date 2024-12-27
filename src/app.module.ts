@@ -9,6 +9,7 @@ import { User } from './user/entities/user.entity';
 import { AuthModule } from './auth/auth.module';
 import { MailModule } from './mail/mail.module';
 import { RedisModule } from './redis/redis.module';
+import { Post } from './post/post.entity/post.entity';
 
 @Module({
   imports: [
@@ -24,7 +25,7 @@ import { RedisModule } from './redis/redis.module';
         username: configService.get('DATABASE_USER'),
         password: configService.get('DATABASE_PASSWORD'),
         database: configService.get('DATABASE_NAME'),
-        entities: [User],
+        entities: [User, Post],
         synchronize: true,
         logging: true,
       }),

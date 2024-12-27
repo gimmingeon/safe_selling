@@ -5,6 +5,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { Response, } from 'express';
 import { AuthGuard } from '@nestjs/passport';
+import { UserInfo } from './decorator/userInfo.decorator';
 
 @Controller('user')
 export class UserController {
@@ -36,15 +37,25 @@ export class UserController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get('/me')
-  async findMe(@Request() req) {
+  async findMe(@UserInfo('id') userId: number) {
 
-    console.log(req.user);
-
-    const userId = req.user.id;
+    // 여기서 가져온 user에는 id와 email만 포함되어 있다.
 
     return await this.userService.findOne(userId);
   }
 
+  // @UseGuards(AuthGuard('jwt'))
+  // @Get('/metest')
+  // async findMe1(
+  //   @UserInfo(['id', 'nickname', 'email']) user: { id: number; nickname: string, email: string },
+  // ) {
+
+  //   // 여기서 가져온 user에는 id와 email만 포함되어 있다.
+  //   const { id, nickname, email } = user;
+
+  //   console.log(id, nickname, email)
+
+  // }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
