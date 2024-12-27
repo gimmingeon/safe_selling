@@ -1,8 +1,9 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UserInfo } from 'src/user/decorator/userInfo.decorator';
 import { AuthGuard } from '@nestjs/passport';
+import { UpdatePostDto } from './dto/update-post.dto';
 
 @Controller('post')
 export class PostController {
@@ -28,10 +29,31 @@ export class PostController {
     }
 
     // 게시글 상세 조회
+    @Get('/:id')
+    async findOnePost(@Param('id') id: number) {
+        return await this.postService.findOnePost(id);
+    }
 
-    // 게시글 검색
-
-    // 게시글 수정
+    // 게시글 수정정
+    @UseGuards(AuthGuard('jwt'))
+    @Patch('/:id')
+    async updatePost(
+        @Body() updatePostDto: UpdatePostDto,
+        @Param('id') postId: number,
+        @UserInfo('id') userId: number
+    ) {
+        return await this.postService.updatePost(updatePostDto, postId, userId)
+    }
 
     // 게시글 삭제
+    @UseGuards(AuthGuard('jwt'))
+    @Delete('/:id')
+    async deletePost(
+        @Param('id') postId: number,
+        @UserInfo('id') userId: number
+    ) {
+        return await this.postService.deletePost(postId, userId)
+    }
+
+    // 게시글 검색
 }
