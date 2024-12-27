@@ -129,6 +129,7 @@ export class UserService {
 
   }
 
+  // 개인 정보 조회
   async findOne(userId: number) {
     return await this.userRepository.findOneBy({ id: userId });
   }

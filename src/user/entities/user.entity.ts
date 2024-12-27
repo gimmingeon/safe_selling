@@ -1,6 +1,7 @@
 import { IsEnum } from 'class-validator';
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { Role } from '../type/userRole.type';
+import { Post } from 'src/post/post.entity/post.entity';
 
 @Entity({
     name: "user"
@@ -30,4 +31,7 @@ export class User {
 
     @UpdateDateColumn({ type: "timestamp" })
     updatedAt: Date;
+
+    @OneToMany(() => Post, (post) => post.user)
+    posts: Post[];
 }
