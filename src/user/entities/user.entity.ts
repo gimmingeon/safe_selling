@@ -2,6 +2,7 @@ import { IsEnum } from 'class-validator';
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { Role } from '../type/userRole.type';
 import { Post } from 'src/post/post.entity/post.entity';
+import { PostComment } from 'src/post-comment/entities/post-comment.entity';
 
 @Entity({
     name: "user"
@@ -34,4 +35,7 @@ export class User {
 
     @OneToMany(() => Post, (post) => post.user)
     posts: Post[];
+
+    @OneToMany(() => PostComment, (postcomment) => postcomment.user)
+    postComments: PostComment[];
 }

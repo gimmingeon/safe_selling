@@ -3,7 +3,6 @@ import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UserInfo } from 'src/user/decorator/userInfo.decorator';
 import { AuthGuard } from '@nestjs/passport';
-import { UpdatePostDto } from './dto/update-post.dto';
 
 @Controller('post')
 export class PostController {
@@ -34,11 +33,11 @@ export class PostController {
         return await this.postService.findOnePost(id);
     }
 
-    // 게시글 수정정
+    // 게시글 수정
     @UseGuards(AuthGuard('jwt'))
     @Patch('/:id')
     async updatePost(
-        @Body() updatePostDto: UpdatePostDto,
+        @Body() updatePostDto: CreatePostDto,
         @Param('id') postId: number,
         @UserInfo('id') userId: number
     ) {
