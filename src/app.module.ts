@@ -10,6 +10,8 @@ import { AuthModule } from './auth/auth.module';
 import { MailModule } from './mail/mail.module';
 import { RedisModule } from './redis/redis.module';
 import { Post } from './post/post.entity/post.entity';
+import { PostCommentModule } from './post-comment/post-comment.module';
+import { PostComment } from './post-comment/entities/post-comment.entity';
 
 @Module({
   imports: [
@@ -25,7 +27,7 @@ import { Post } from './post/post.entity/post.entity';
         username: configService.get('DATABASE_USER'),
         password: configService.get('DATABASE_PASSWORD'),
         database: configService.get('DATABASE_NAME'),
-        entities: [User, Post],
+        entities: [User, Post, PostComment],
         synchronize: true,
         logging: true,
       }),
@@ -36,6 +38,7 @@ import { Post } from './post/post.entity/post.entity';
     AuthModule,
     MailModule,
     RedisModule,
+    PostCommentModule,
   ],
   controllers: [AppController],
   providers: [AppService],

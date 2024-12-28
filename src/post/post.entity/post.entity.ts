@@ -1,12 +1,13 @@
+import { PostComment } from 'src/post-comment/entities/post-comment.entity';
 import { User } from 'src/user/entities/user.entity';
-import { Column, Entity, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 // import { PostStatus } from '../types/post-status.enum'; // PostStatus 열거형을 가져옵니다.
 
 @Entity({
     name: "post"
 })
 export class Post {
-    @PrimaryGeneratedColumn()
+    @PrimaryGeneratedColumn({ unsigned: true })
     id: number;
 
     @Column({ type: 'int', nullable: false, unsigned: true })
@@ -40,4 +41,7 @@ export class Post {
     @ManyToOne(() => User, (user) => user.posts)
     @JoinColumn()
     user: User;
+
+    @OneToMany(() => PostComment, (postComment) => postComment.post)
+    postComments: PostComment[];
 }
