@@ -12,6 +12,11 @@ import { RedisModule } from './redis/redis.module';
 import { Post } from './post/post.entity/post.entity';
 import { PostCommentModule } from './post-comment/post-comment.module';
 import { PostComment } from './post-comment/entities/post-comment.entity';
+import { ChatModule } from './chat/chat.module';
+import { Chat } from './chat/entities/chat.entity';
+import { ChatRoom } from './chat/entities/chatRoom.entity';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -27,7 +32,7 @@ import { PostComment } from './post-comment/entities/post-comment.entity';
         username: configService.get('DATABASE_USER'),
         password: configService.get('DATABASE_PASSWORD'),
         database: configService.get('DATABASE_NAME'),
-        entities: [User, Post, PostComment],
+        entities: [User, Post, PostComment, Chat, ChatRoom],
         synchronize: true,
         logging: true,
       }),
@@ -39,8 +44,9 @@ import { PostComment } from './post-comment/entities/post-comment.entity';
     MailModule,
     RedisModule,
     PostCommentModule,
+    ChatModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [],
+  providers: [],
 })
 export class AppModule { }
