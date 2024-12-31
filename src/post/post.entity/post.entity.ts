@@ -1,3 +1,4 @@
+import { ChatRoom } from 'src/chat/entities/chatRoom.entity';
 import { PostComment } from 'src/post-comment/entities/post-comment.entity';
 import { User } from 'src/user/entities/user.entity';
 import { Column, Entity, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
@@ -44,4 +45,7 @@ export class Post {
 
     @OneToMany(() => PostComment, (postComment) => postComment.post)
     postComments: PostComment[];
+
+    @OneToMany(() => ChatRoom, (chatRoom) => chatRoom.post)
+    chatRoom: ChatRoom[];
 }

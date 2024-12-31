@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Socket.IO Chat</title>
+    <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+        }
+
+        #messages {
+            margin-top: 20px;
+            height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+
+        button {
+            margin: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Socket.IO Chat Room Test</h1>
+
+    <!-- 버튼을 클릭하여 채팅방 생성, 메시지 전송 및 조회 -->
+    <button id="joinRoomBtn">Create and Join Chat Room</button>
+    <button id="sendMessageBtn" disabled>Send 'Hello' Message</button>
+    <button id="fetchMessagesBtn" disabled>Fetch Messages</button>
+
+    <div id="messages"></div>
+
+    <script>
+        // Socket.IO 클라이언트 연결
+        const socket = io('http://localhost:3000/chat', {
+            withCredentials: true, // 쿠키 보내기 허용
+        });
+
+
+        socket.on('connect', () => {
+            console.log('W bSocket connected');
+        });
+
+        socket.on('connect_error', (err) => {
+            console.error('WebSocket connection error:', err);
+        });
+
+        let chatRoomId = null;
+
+        // 채팅방에 참여
+        document.getElementById('joinRoomBtn').addEventListener('click', () => {
+            const postId = 1;
+            const postUserId = 1;
+            const commentUserId = 1;
+
+            socket.emit('joinChatRoom', { postId, postUserId, commentUserId });
+        });
+
+        // 메시지 보내기
+        document.getElementById('sendMessageBtn').addEventListener('click', () => {
+            if (chatRoomId !== null) {
+                socket.emit('sendMessage', {
+                    chatRoomId,
+                    senderId: 1,
+                    message: 'Hello',
+                });
+            }
+        });
+
+        // 메시지 조회
+        document.getElementById('fetchMessagesBtn').addEventListener('click', () => {
+            if (chatRoomId !== null) {
+                socket.emit('fetchMessages', { chatRoomId });
+            }
+        });
+
+        // 서버에서 채팅방에 참여한 정보를 받음
+        socket.on('joinedRoom', (data) => {
+            chatRoomId = data.chatRoomId;
+            document.getElementById('sendMessageBtn').disabled = false;
+            document.getElementById('fetchMessagesBtn').disabled = false;
+            appendMessage(`Joined chat room with ID: ${chatRoomId}`);
+        });
+
+        // 서버에서 메시지 전송을 받음
+        socket.on('receiveMessage', (data) => {
+            appendMessage(`Received message: ${data.message} (from user ${data.senderId})`);
+        });
+
+        // 서버에서 채팅 메시지 목록을 받음
+        socket.on('messages', (messages) => {
+            appendMessage('Fetched messages:');
+            messages.forEach((message) => {
+                appendMessage(`Message: ${message.message}`);
+            });
+        });
+
+        // 서버에서 에러 메시지 받기
+        socket.on('error', (error) => {
+            console.error('Error:', error.message);
+            appendMessage('Error: ' + error.message);
+        });
+
+        // 메시지를 화면에 추가
+        function appendMessage(message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.textContent = message;
+            document.getElementById('messages').appendChild(messageDiv);
+        }
+    </script>
+
+</body>
+
+</html>
