@@ -26,14 +26,30 @@ export class PostService {
     }
 
     //게시물 전체 조회
-    async findAllPost() {
-        return await this.postRepository.find({
-            select: {
-                title: true,
-                user_nickname: true
-            },
-            order: { id: 'DESC' }
-        });
+    async findAllPost(page: number = 1, limit: number = 1, search?: string) {
+
+        // QueryBuilder를 초기화해서 sql 쿼리 작성성
+        const queryBuilder = this.postRepository.createQueryBuilder('post');
+
+        if (search) {
+            queryBuilder.where('post.title Like :search OR post.description LIKE :search', {
+                search: `%${search}%`,
+            });
+        }
+
+        const [posts, total] = await queryBuilder
+            .select(['post.id', 'post.title', 'post.user_nickname'])
+            .orderBy('post.id', 'DESC')
+            .skip((page - 1) * limit)
+            .take(limit)
+            .getManyAndCount();
+
+        return {
+            total,
+            page,
+            limit,
+            posts
+        }
     }
 
     // 게시글 상세 조회
@@ -65,7 +81,7 @@ export class PostService {
                 description
             });
 
-        return await this.postRepository.findOneBy({ id: postId });
+        await this.postRepository.findOneBy({ id: postId });
     }
 
     // 게시글 삭제
@@ -78,7 +94,5 @@ export class PostService {
         }
 
         await this.postRepository.delete({ id: postId });
-
-        return { message: "게시글이 삭제되었습니다." };
     }
 }
